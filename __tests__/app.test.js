@@ -37,3 +37,30 @@ describe("GET /api/topics", () => {
       });
   });
 });
+
+describe("GET /api", () => {
+  test("GET:200 - Responds with an object describing all possible endpoints on the API", () => {
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then(({ body }) => {
+        console.log(body);
+        expect(Object.keys(body).length).toBeGreaterThan(0);
+        Object.values(body).forEach((endpoint) => {
+          expect(endpoint).toMatchObject({
+            description: expect.any(String),
+            queries: expect.any(Array),
+            exampleResponse: expect.any(Object),
+          });
+        });
+      });
+  });
+  test("GET:404 - Responds with an error message of Invalid endpoint if the endpoint is incorrect", () => {
+    return request(app)
+      .get("/apj")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid endpoint");
+      });
+  });
+});
