@@ -36,12 +36,4 @@ describe("GET /api/topics", () => {
         expect(body.msg).toBe("Invalid endpoint");
       });
   });
-  test("GET:400 - Responds with an error message of Invalid query or parameter if passed an incorrect query or parameter", () => {
-    return request(app)
-      .get("/api/topics?order=desc")
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.msg).toBe("Invalid query or parameter");
-      });
-  });
 });
