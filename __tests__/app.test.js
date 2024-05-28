@@ -44,7 +44,6 @@ describe("GET /api", () => {
       .get("/api")
       .expect(200)
       .then(({ body }) => {
-        console.log(body);
         expect(Object.keys(body).length).toBeGreaterThan(0);
         Object.values(body).forEach((endpoint) => {
           expect(endpoint).toMatchObject({
@@ -61,6 +60,46 @@ describe("GET /api", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Invalid endpoint");
+      });
+  });
+});
+
+describe("GET /api/articles/:article_id", () => {
+  test("GET:200 - Responds with an article relevant to the ID ,specified as a parameter", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.length).toBeGreaterThan(0);
+        expect(body).toMatchObject([
+          {
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: expect.any(String),
+            votes: 100,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          },
+        ]);
+      });
+  });
+  test("GET:404 - Responds with an error message of author id invalid if the author Id does not exist", () => {
+    return request(app)
+      .get("/api/articles/99999")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Author id invalid");
+      });
+  });
+  test("GET:400 - Responds with an error message of Incorrect id type if the author Id parameter contains characters other than numbers", () => {
+    return request(app)
+      .get("/api/articles/number1")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Incorrect id type");
       });
   });
 });
