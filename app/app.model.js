@@ -25,7 +25,7 @@ exports.selectArticleById = (article_id) => {
 
   return db.query(query, [article_id]).then((article) => {
     if (article.rows.length === 0) {
-      return Promise.reject({ status: 404, msg: "Author id invalid" });
+      return Promise.reject({ status: 404, msg: "Author id not found" });
     }
     return article.rows;
   });
@@ -37,5 +37,13 @@ exports.selectAllArticles = () => {
 
   return db.query(query).then((articles) => {
     return articles.rows;
+  });
+};
+
+exports.selectCommentsByArticle = (article_id) => {
+  let query = "SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC";
+
+  return db.query(query, [article_id]).then((comments) => {
+    return comments.rows;
   });
 };
