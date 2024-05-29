@@ -3,6 +3,7 @@ const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const app = require("../app/app");
 const request = require("supertest");
+const sorted = require("jest-sorted");
 
 afterAll(() => {
   return db.end();
@@ -71,6 +72,7 @@ describe("GET /api/articles/:article_id", () => {
       .expect(200)
       .then(({ body }) => {
         expect(body.length).toBeGreaterThan(0);
+        expect(body).toBeSortedBy("date", { descending: true });
         expect(body).toMatchObject([
           {
             article_id: 1,
@@ -100,6 +102,38 @@ describe("GET /api/articles/:article_id", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Incorrect id type");
+      });
+  });
+});
+
+describe("GET /api/articles", () => {
+  test("GET:200 - Responds with an array of all articles with the correct properties, sorted by date in descending order", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.length).toBe(13);
+        expect(body).toBeSortedBy("created_at", { descending: true });
+        body.forEach((article) => {
+          expect(article).toMatchObject({
+            author: expect.any(String),
+            title: expect.any(String),
+            article_id: expect.any(Number),
+            topic: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(Number),
+          });
+        });
+      });
+  });
+  test("GET:404 - Responds with an error message of Invalid endpoint if the endpoint is incorrect", () => {
+    return request(app)
+      .get("/api/article")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid endpoint");
       });
   });
 });
