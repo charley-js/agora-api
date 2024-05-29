@@ -6,6 +6,7 @@ const {
   getAllArticles,
   getCommentsForArticle,
   createComment,
+  updateArticle,
 } = require("./app.controller");
 
 const app = express();
@@ -23,6 +24,8 @@ app.get("/api/articles/:article_id", getArticleById);
 app.get("/api/articles/:article_id/comments", getCommentsForArticle);
 
 app.post("/api/articles/:article_id/comments", createComment);
+
+app.patch("/api/articles/:article_id", updateArticle);
 
 //Error-handling
 
