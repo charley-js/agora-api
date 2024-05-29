@@ -93,7 +93,7 @@ describe("GET /api/articles/:article_id", () => {
       .get("/api/articles/99999")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Author id invalid");
+        expect(body.msg).toBe("Author id not found");
       });
   });
   test("GET:400 - Responds with an error message of Incorrect id type if the author Id parameter contains characters other than numbers", () => {
@@ -134,6 +134,61 @@ describe("GET /api/articles", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Invalid endpoint");
+      });
+  });
+});
+
+describe("GET /api/articles/:article_id/comments", () => {
+  test("GET:200 - Responds with an array of comments for a specific article, with the correct properties", () => {
+    return request(app)
+      .get("/api/articles/5/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.length).toBe(2);
+        expect(body).toBeSortedBy("created_at", { descending: true });
+        expect(body).toMatchObject([
+          {
+            comment_id: 15,
+            votes: 1,
+            created_at: expect.any(String),
+            author: "butter_bridge",
+            body: "I am 100% sure that we're not completely sure.",
+            article_id: 5,
+          },
+          {
+            comment_id: 14,
+            votes: 16,
+            created_at: expect.any(String),
+            author: "icellusedkars",
+            body: "What do you see? I have no idea where this will lead us. This place I speak of, is known as the Black Lodge.",
+            article_id: 5,
+          },
+        ]);
+      });
+  });
+  test("GET:200 - Responds with an empty array if article id is valid but has no comments", () => {
+    return request(app)
+      .get("/api/articles/2/comments")
+      .expect(200)
+      .then(({ body }) => {
+        console.log(body);
+        expect(body).toEqual([]);
+      });
+  });
+  test("GET:404 - Responds with an error message of Author id not found if the author id does not exist", () => {
+    return request(app)
+      .get("/api/articles/9999/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Author id not found");
+      });
+  });
+  test("GET:400 - Responds with an error message of Incorrect id type if the author id parameter contains characters other than numbers", () => {
+    return request(app)
+      .get("/api/articles/number5/comments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Incorrect id type");
       });
   });
 });

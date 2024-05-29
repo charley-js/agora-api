@@ -1,4 +1,10 @@
-const { selectAllTopics, readEndpoints, selectArticleById, selectAllArticles } = require("./app.model");
+const {
+  selectAllTopics,
+  readEndpoints,
+  selectArticleById,
+  selectAllArticles,
+  selectCommentsByArticle,
+} = require("./app.model");
 
 exports.getAllTopics = (req, res, next) => {
   selectAllTopics()
@@ -35,6 +41,21 @@ exports.getAllArticles = (req, res, next) => {
   selectAllArticles()
     .then((articles) => {
       res.status(200).send(articles);
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.getCommentsForArticle = (req, res, next) => {
+  const { article_id } = req.params;
+  //
+  selectArticleById(article_id)
+    .then(() => {
+      return selectCommentsByArticle(article_id);
+    })
+    .then((comments) => {
+      res.status(200).send(comments);
     })
     .catch((err) => {
       next(err);
