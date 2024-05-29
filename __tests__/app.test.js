@@ -171,7 +171,6 @@ describe("GET /api/articles/:article_id/comments", () => {
       .get("/api/articles/2/comments")
       .expect(200)
       .then(({ body }) => {
-        console.log(body);
         expect(body).toEqual([]);
       });
   });
@@ -189,6 +188,80 @@ describe("GET /api/articles/:article_id/comments", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Incorrect id type");
+      });
+  });
+});
+
+describe("POST /api/articles/:article_id/comments", () => {
+  test("POST:201 - Responds with the newly posted comment in the correct format", () => {
+    const comment = {
+      username: "icellusedkars",
+      body: "This is a comment, right?",
+    };
+    return request(app)
+      .post("/api/articles/5/comments")
+      .send(comment)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body).toMatchObject({
+          comment_id: 19,
+          body: "This is a comment, right?",
+          article_id: 5,
+          author: "icellusedkars",
+          votes: 0,
+          created_at: expect.any(String),
+        });
+      });
+  });
+  test("POST:400 - Responds with an error message of Invalid comment format if the posted comment is not in the correct format", () => {
+    const comment = {
+      person: "icellusedkars",
+    };
+    return request(app)
+      .post("/api/articles/5/comments")
+      .send(comment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid comment format");
+      });
+  });
+  test("POST:404 - Responds with an error message of Author id not found if the author id does not exist", () => {
+    const comment = {
+      username: "icellusedkars",
+      body: "This is a comment, right?",
+    };
+    return request(app)
+      .post("/api/articles/9999/comments")
+      .send(comment)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Author id not found");
+      });
+  });
+  test("POST:400 - Responds with an error message of Incorrect id type if the author id parameter contains characters other than numbers", () => {
+    const comment = {
+      username: "icellusedkars",
+      body: "This is a comment, right?",
+    };
+    return request(app)
+      .post("/api/articles/number5/comments")
+      .send(comment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Incorrect id type");
+      });
+  });
+  test("POST:400 - Responds with an error message of Invalid input if the specified username does not exist", () => {
+    const comment = {
+      username: "northcoder97",
+      body: "hello world",
+    };
+    return request(app)
+      .post("/api/articles/5/comments")
+      .send(comment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid input");
       });
   });
 });

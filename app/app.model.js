@@ -1,5 +1,6 @@
 const db = require("../db/connection");
 const fsp = require("fs/promises");
+const format = require("pg-format");
 
 exports.selectAllTopics = () => {
   let query = "SELECT * FROM topics;";
@@ -45,5 +46,18 @@ exports.selectCommentsByArticle = (article_id) => {
 
   return db.query(query, [article_id]).then((comments) => {
     return comments.rows;
+  });
+};
+
+exports.insertComment = (article_id, comment) => {
+  if (!("username" in comment) || !("body" in comment) || Object.keys(comment).length === 0) {
+    return Promise.reject({ status: 400, msg: "Invalid comment format" });
+  }
+  const formattedComment = [[article_id, comment.username, comment.body]];
+
+  let query = format("INSERT INTO comments (article_id, author, body) VALUES %L RETURNING *;", formattedComment);
+
+  return db.query(query).then((result) => {
+    return result.rows[0];
   });
 };
