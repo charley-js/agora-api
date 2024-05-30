@@ -265,3 +265,84 @@ describe("POST /api/articles/:article_id/comments", () => {
       });
   });
 });
+
+describe("PATCH /api/articles/:article_id", () => {
+  test("PATCH:200 - Responds with the updated article in the correct format", () => {
+    const update = {
+      inc_votes: 1,
+    };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(update)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toMatchObject({
+          author: "butter_bridge",
+          title: "Living in the shadow of a great man",
+          article_id: 1,
+          topic: "mitch",
+          created_at: expect.any(String),
+          votes: 101,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        });
+      });
+  });
+  test("PATCH:200 - Responds with the updated article and is able to decrease votes , aswell as increase ", () => {
+    const update = {
+      inc_votes: -100,
+    };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(update)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toMatchObject({
+          author: "butter_bridge",
+          title: "Living in the shadow of a great man",
+          article_id: 1,
+          topic: "mitch",
+          created_at: expect.any(String),
+          votes: 0,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        });
+      });
+  });
+  test("PATCH:400 - Responds with an error message of Invalid input if the patch request is not in the correct format", () => {
+    const update = {
+      inc_votes: "one-hundred",
+    };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(update)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid input");
+      });
+  });
+  test("PATCH:404 - Responds with an error message of Author id not found if the author id does not exist", () => {
+    const update = {
+      inc_votes: 1,
+    };
+    return request(app)
+      .patch("/api/articles/9999")
+      .send(update)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Author id not found");
+      });
+  });
+  test("PATCH:400 - Responds with an error message of Incorrect id type if the author id parameter contains characters other than numbers", () => {
+    const update = {
+      inc_votes: 1,
+    };
+    return request(app)
+      .patch("/api/articles/number5")
+      .send(update)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Incorrect id type");
+      });
+  });
+});
