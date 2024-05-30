@@ -1,6 +1,5 @@
 const {
   selectAllTopics,
-  readEndpoints,
   selectArticleById,
   selectAllArticles,
   selectCommentsByArticle,
@@ -10,6 +9,8 @@ const {
   selectCommentById,
   selectAllUsers,
 } = require("./app.model");
+
+const fsp = require("fs/promises");
 
 exports.getAllTopics = (req, res, next) => {
   selectAllTopics()
@@ -22,9 +23,10 @@ exports.getAllTopics = (req, res, next) => {
 };
 
 exports.getAllEndpoints = (req, res, next) => {
-  readEndpoints()
+  return fsp
+    .readFile("/home/charley-js/Northcoders/be-project/be-nc-news/endpoints.json", "utf-8")
     .then((endpoints) => {
-      res.status(200).send(endpoints);
+      res.status(200).send(JSON.parse(endpoints));
     })
     .catch((err) => {
       next(err);

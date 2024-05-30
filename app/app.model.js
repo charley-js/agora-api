@@ -10,14 +10,6 @@ exports.selectAllTopics = () => {
   });
 };
 
-exports.readEndpoints = () => {
-  return fsp
-    .readFile("/home/charley-js/Northcoders/be-project/be-nc-news/endpoints.json", "utf-8")
-    .then((endpoints) => {
-      return JSON.parse(endpoints);
-    });
-};
-
 exports.selectArticleById = (article_id, comment_count) => {
   const validCommentCount = ["true", "false"];
 
@@ -40,7 +32,7 @@ exports.selectArticleById = (article_id, comment_count) => {
 
   return db.query(query, [article_id]).then((article) => {
     if (article.rows.length === 0) {
-      return Promise.reject({ status: 404, msg: "Author id not found" });
+      return Promise.reject({ status: 404, msg: "Article id not found" });
     }
     return article.rows[0];
   });
@@ -48,26 +40,30 @@ exports.selectArticleById = (article_id, comment_count) => {
 
 exports.selectAllArticles = (topic) => {
   const queryValues = [];
-  const validTopics = ["cats", "mitch", "coding", "football", "cooking"];
+  // const validTopics = ["cats", "mitch", "coding", "football", "cooking"];
 
-  if (topic && !validTopics.includes(topic)) {
-    return Promise.reject({ status: 404, msg: "Topic not found" });
-  }
+  return selectAllTopics()
+    .then((validTopics) => {
+      if (topic && !validTopics.includes(topic)) {
+        return Promise.reject({ status: 404, msg: "Topic not found" });
+      }
 
-  let query =
-    "SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id)::INT AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id ";
+      let query =
+        "SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id)::INT AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id ";
 
-  if (topic) {
-    query += "WHERE topic = $1";
-    queryValues.push(topic);
-  }
+      if (topic) {
+        query += "WHERE topic = $1";
+        queryValues.push(topic);
+      }
 
-  query +=
-    "GROUP BY articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url ORDER BY articles.created_at DESC ;";
+      query +=
+        "GROUP BY articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url ORDER BY articles.created_at DESC ;";
 
-  return db.query(query, queryValues).then((articles) => {
-    return articles.rows;
-  });
+      return db.query(query, queryValues);
+    })
+    .then((articles) => {
+      return articles.rows;
+    });
 };
 
 exports.selectCommentsByArticle = (article_id) => {
@@ -122,5 +118,13 @@ exports.selectAllUsers = () => {
 
   return db.query(query).then((users) => {
     return users.rows;
+  });
+};
+
+const selectAllTopics = () => {
+  let query = "SELECT slug FROM topics;";
+  return db.query(query).then((topics) => {
+    const validTopics = topics.rows.map((topic) => topic.slug);
+    return validTopics;
   });
 };

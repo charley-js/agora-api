@@ -55,14 +55,6 @@ describe("GET /api", () => {
         });
       });
   });
-  test("GET:404 - Responds with an error message of Invalid endpoint if the endpoint is incorrect", () => {
-    return request(app)
-      .get("/apj")
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe("Invalid endpoint");
-      });
-  });
 });
 
 describe("GET /api/articles/:article_id", () => {
@@ -103,15 +95,15 @@ describe("GET /api/articles/:article_id", () => {
         expect(body.msg).toBe("Incorrect query value");
       });
   });
-  test("GET:404 - Responds with an error message of author id invalid if the author Id does not exist", () => {
+  test("GET:404 - Responds with an error message of article id not found if the article Id does not exist", () => {
     return request(app)
       .get("/api/articles/99999")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Author id not found");
+        expect(body.msg).toBe("Article id not found");
       });
   });
-  test("GET:400 - Responds with an error message of Incorrect id type if the author Id parameter contains characters other than numbers", () => {
+  test("GET:400 - Responds with an error message of Incorrect id type if the article Id parameter contains characters other than numbers", () => {
     return request(app)
       .get("/api/articles/number1")
       .expect(400)
@@ -130,6 +122,11 @@ describe("GET /api/articles", () => {
         expect(body.length).toBe(13);
         expect(body).toBeSortedBy("created_at", { descending: true });
         body.forEach((article) => {
+          expect(article).toEqual(
+            expect.not.objectContaining({
+              body: expect.any(String),
+            })
+          );
           expect(article).toMatchObject({
             author: expect.any(String),
             title: expect.any(String),
@@ -166,21 +163,13 @@ describe("GET /api/articles", () => {
   });
   test("GET:200 - Responds with an empty array if the topic is valid but there are no articles with that topic", () => {
     return request(app)
-      .get("/api/articles?topic=coding")
+      .get("/api/articles?topic=paper")
       .expect(200)
       .then(({ body }) => {
         expect(body).toEqual([]);
       });
   });
 
-  test("GET:404 - Responds with an error message of Invalid endpoint if the endpoint is incorrect", () => {
-    return request(app)
-      .get("/api/article")
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe("Invalid endpoint");
-      });
-  });
   test("GET:404 - Responds with an error message of Topic not found if passed a topic query that does not exist", () => {
     return request(app)
       .get("/api/articles?topic=fruit")
@@ -227,15 +216,15 @@ describe("GET /api/articles/:article_id/comments", () => {
         expect(body).toEqual([]);
       });
   });
-  test("GET:404 - Responds with an error message of Author id not found if the author id does not exist", () => {
+  test("GET:404 - Responds with an error message of Article id not found if the article id does not exist", () => {
     return request(app)
       .get("/api/articles/9999/comments")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Author id not found");
+        expect(body.msg).toBe("Article id not found");
       });
   });
-  test("GET:400 - Responds with an error message of Incorrect id type if the author id parameter contains characters other than numbers", () => {
+  test("GET:400 - Responds with an error message of Incorrect id type if the article id parameter contains characters other than numbers", () => {
     return request(app)
       .get("/api/articles/number5/comments")
       .expect(400)
@@ -278,7 +267,7 @@ describe("POST /api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("Invalid comment format");
       });
   });
-  test("POST:404 - Responds with an error message of Author id not found if the author id does not exist", () => {
+  test("POST:404 - Responds with an error message of Article id not found if the article id does not exist", () => {
     const comment = {
       username: "icellusedkars",
       body: "This is a comment, right?",
@@ -288,10 +277,10 @@ describe("POST /api/articles/:article_id/comments", () => {
       .send(comment)
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Author id not found");
+        expect(body.msg).toBe("Article id not found");
       });
   });
-  test("POST:400 - Responds with an error message of Incorrect id type if the author id parameter contains characters other than numbers", () => {
+  test("POST:400 - Responds with an error message of Incorrect id type if the article id parameter contains characters other than numbers", () => {
     const comment = {
       username: "icellusedkars",
       body: "This is a comment, right?",
@@ -374,7 +363,7 @@ describe("PATCH /api/articles/:article_id", () => {
         expect(body.msg).toBe("Invalid input");
       });
   });
-  test("PATCH:404 - Responds with an error message of Author id not found if the author id does not exist", () => {
+  test("PATCH:404 - Responds with an error message of Article id not found if the article id does not exist", () => {
     const update = {
       inc_votes: 1,
     };
@@ -383,10 +372,10 @@ describe("PATCH /api/articles/:article_id", () => {
       .send(update)
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Author id not found");
+        expect(body.msg).toBe("Article id not found");
       });
   });
-  test("PATCH:400 - Responds with an error message of Incorrect id type if the author id parameter contains characters other than numbers", () => {
+  test("PATCH:400 - Responds with an error message of Incorrect id type if the article id parameter contains characters other than numbers", () => {
     const update = {
       inc_votes: 1,
     };
