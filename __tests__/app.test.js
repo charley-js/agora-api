@@ -71,21 +71,36 @@ describe("GET /api/articles/:article_id", () => {
       .get("/api/articles/1")
       .expect(200)
       .then(({ body }) => {
-        expect(body.length).toBeGreaterThan(0);
-        expect(body).toBeSortedBy("date", { descending: true });
-        expect(body).toMatchObject([
-          {
-            article_id: 1,
-            title: "Living in the shadow of a great man",
-            topic: "mitch",
-            author: "butter_bridge",
-            body: "I find this existence challenging",
-            created_at: expect.any(String),
-            votes: 100,
-            article_img_url:
-              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-          },
-        ]);
+        expect(Object.keys(body).length).toBeGreaterThan(0);
+        expect(body).toMatchObject({
+          article_id: 1,
+          title: "Living in the shadow of a great man",
+          topic: "mitch",
+          author: "butter_bridge",
+          body: "I find this existence challenging",
+          created_at: expect.any(String),
+          votes: 100,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        });
+      });
+  });
+  test("GET:200 - Responds with the comment_count of a specific article when passed a query of comment_count", () => {
+    return request(app)
+      .get("/api/articles/1?comment_count=true")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toMatchObject({
+          comment_count: 11,
+        });
+      });
+  });
+  test("GET:400 - Responds with an error message of Incorrect query value if the comment_count query is neither true or false", () => {
+    return request(app)
+      .get("/api/articles/1?comment_count=yes")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Incorrect query value");
       });
   });
   test("GET:404 - Responds with an error message of author id invalid if the author Id does not exist", () => {

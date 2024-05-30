@@ -33,7 +33,8 @@ exports.getAllEndpoints = (req, res, next) => {
 
 exports.getArticleById = (req, res, next) => {
   const { article_id } = req.params;
-  selectArticleById(article_id)
+  const { comment_count } = req.query;
+  selectArticleById(article_id, comment_count)
     .then((article) => {
       res.status(200).send(article);
     })
@@ -44,7 +45,6 @@ exports.getArticleById = (req, res, next) => {
 
 exports.getAllArticles = (req, res, next) => {
   const { topic } = req.query;
-  console.log(topic, "In the controller");
   selectAllArticles(topic)
     .then((articles) => {
       res.status(200).send(articles);
