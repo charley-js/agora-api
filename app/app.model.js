@@ -18,17 +18,31 @@ exports.readEndpoints = () => {
     });
 };
 
-exports.selectArticleById = (article_id) => {
+exports.selectArticleById = (article_id, comment_count) => {
+  const validCommentCount = ["true", "false"];
+
+  let query = "SELECT ";
+
   if (/^[0-9]+$/.test(article_id) === false) {
     return Promise.reject({ status: 400, msg: "Incorrect id type" });
   }
-  let query = "SELECT * FROM articles WHERE article_id = $1 ;";
+
+  if (comment_count && !validCommentCount.includes(comment_count)) {
+    return Promise.reject({ status: 400, msg: "Incorrect query value" });
+  }
+
+  if (comment_count) {
+    query += "COUNT(comments.comment_id)::INT AS comment_count FROM comments ";
+  } else {
+    query += "* FROM articles ";
+  }
+  query += "WHERE article_id = $1 ;";
 
   return db.query(query, [article_id]).then((article) => {
     if (article.rows.length === 0) {
       return Promise.reject({ status: 404, msg: "Author id not found" });
     }
-    return article.rows;
+    return article.rows[0];
   });
 };
 
