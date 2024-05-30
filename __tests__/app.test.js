@@ -346,3 +346,32 @@ describe("PATCH /api/articles/:article_id", () => {
       });
   });
 });
+
+describe("DELETE /api/comments/:comment_id", () => {
+  test("DELETE:204 - Responds with a status of 204 on deletion of a comment", () => {
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204)
+      .then(() => {
+        return db.query("SELECT * FROM comments WHERE comment_id = 1;").then((comment) => {
+          expect(comment.rows).toEqual([]);
+        });
+      });
+  });
+  test("DELETE:404 - Responds with an error message of Comment id not found if the comment id doesn't exist", () => {
+    return request(app)
+      .delete("/api/comments/999")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Comment id not found");
+      });
+  });
+  test("DELETE:400 - Responds with an error message of Incorrect id type if the comment id parameter contains characters other than numbers", () => {
+    return request(app)
+      .delete("/api/comments/one")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Incorrect id type");
+      });
+  });
+});
