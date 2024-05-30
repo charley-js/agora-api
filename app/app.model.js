@@ -87,3 +87,11 @@ exports.selectCommentById = (comment_id) => {
     }
   });
 };
+
+exports.selectAllUsers = () => {
+  let query = "SELECT * FROM users;";
+
+  return db.query(query).then((users) => {
+    return users.rows;
+  });
+};

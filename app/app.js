@@ -8,6 +8,7 @@ const {
   createComment,
   updateArticle,
   deleteComment,
+  getAllUsers,
 } = require("./app.controller");
 
 const app = express();
@@ -29,6 +30,8 @@ app.post("/api/articles/:article_id/comments", createComment);
 app.patch("/api/articles/:article_id", updateArticle);
 
 app.delete("/api/comments/:comment_id", deleteComment);
+
+app.get("/api/users", getAllUsers);
 
 //Error-handling
 
