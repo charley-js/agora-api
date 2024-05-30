@@ -128,12 +128,50 @@ describe("GET /api/articles", () => {
         });
       });
   });
+  test("GET:200 - Responds with an array of all articles by topic when passed a topic=value query", () => {
+    return request(app)
+      .get("/api/articles?topic=cats")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.length).toBe(1);
+        body.forEach((article) => {
+          expect(article).toMatchObject({
+            article_id: expect.any(Number),
+            title: "UNCOVERED: catspiracy to bring down democracy",
+            topic: "cats",
+            author: "rogersop",
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            comment_count: expect.any(Number),
+          });
+        });
+      });
+  });
+  test("GET:200 - Responds with an empty array if the topic is valid but there are no articles with that topic", () => {
+    return request(app)
+      .get("/api/articles?topic=coding")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toEqual([]);
+      });
+  });
+
   test("GET:404 - Responds with an error message of Invalid endpoint if the endpoint is incorrect", () => {
     return request(app)
       .get("/api/article")
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Invalid endpoint");
+      });
+  });
+  test("GET:404 - Responds with an error message of Topic not found if passed a topic query that does not exist", () => {
+    return request(app)
+      .get("/api/articles?topic=fruit")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Topic not found");
       });
   });
 });
