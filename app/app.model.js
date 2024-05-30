@@ -32,11 +32,26 @@ exports.selectArticleById = (article_id) => {
   });
 };
 
-exports.selectAllArticles = () => {
-  let query =
-    "SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id)::INT AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id GROUP BY articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url ORDER BY articles.created_at DESC;";
+exports.selectAllArticles = (topic) => {
+  const queryValues = [];
+  const validTopics = ["cats", "mitch", "coding", "football", "cooking"];
 
-  return db.query(query).then((articles) => {
+  if (topic && !validTopics.includes(topic)) {
+    return Promise.reject({ status: 404, msg: "Topic not found" });
+  }
+
+  let query =
+    "SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id)::INT AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id ";
+
+  if (topic) {
+    query += "WHERE topic = $1";
+    queryValues.push(topic);
+  }
+
+  query +=
+    "GROUP BY articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url ORDER BY articles.created_at DESC ;";
+
+  return db.query(query, queryValues).then((articles) => {
     return articles.rows;
   });
 };
