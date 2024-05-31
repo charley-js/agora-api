@@ -26,7 +26,7 @@ exports.getAllEndpoints = (req, res, next) => {
   return fsp
     .readFile("endpoints.json", "utf-8")
     .then((endpoints) => {
-      res.status(200).send(endpoints);
+      res.status(200).send(JSON.parse(endpoints));
     })
     .catch((err) => {
       next(err);

@@ -44,8 +44,8 @@ describe("GET /api", () => {
     return request(app)
       .get("/api")
       .expect(200)
-      .then(({ text }) => {
-        const endpoints = JSON.parse(text);
+      .then(({ body }) => {
+        const endpoints = body;
         expect(Object.keys(endpoints).length).toBeGreaterThan(0);
         Object.values(endpoints).forEach((endpoint) => {
           expect(endpoint).toMatchObject({
