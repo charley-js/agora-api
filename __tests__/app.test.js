@@ -44,9 +44,10 @@ describe("GET /api", () => {
     return request(app)
       .get("/api")
       .expect(200)
-      .then(({ body }) => {
-        expect(Object.keys(body).length).toBeGreaterThan(0);
-        Object.values(body).forEach((endpoint) => {
+      .then(({ text }) => {
+        const endpoints = JSON.parse(text);
+        expect(Object.keys(endpoints).length).toBeGreaterThan(0);
+        Object.values(endpoints).forEach((endpoint) => {
           expect(endpoint).toMatchObject({
             description: expect.any(String),
             queries: expect.any(Array),
