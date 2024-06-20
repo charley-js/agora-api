@@ -38,9 +38,18 @@ exports.selectArticleById = (article_id, comment_count) => {
   });
 };
 
-exports.selectAllArticles = (topic) => {
+exports.selectAllArticles = (topic, sort_by, order) => {
   const queryValues = [];
-  // const validTopics = ["cats", "mitch", "coding", "football", "cooking"];
+  const validSortBy = ["created_at", "votes", "comment_count"];
+  const validOrder = ["asc", "desc"];
+
+  if (!validSortBy.includes(sort_by)) {
+    return Promise.reject({ status: 400, msg: "Invalid sort by value" });
+  }
+
+  if (!validOrder.includes(order)) {
+    return Promise.reject({ status: 400, msg: "Invalid order value" });
+  }
 
   return selectAllTopics()
     .then((validTopics) => {
@@ -52,12 +61,14 @@ exports.selectAllArticles = (topic) => {
         "SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id)::INT AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id ";
 
       if (topic) {
-        query += "WHERE topic = $1";
+        query += "WHERE topic = $1 ";
         queryValues.push(topic);
       }
 
       query +=
-        "GROUP BY articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url ORDER BY articles.created_at DESC ;";
+        "GROUP BY articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url ";
+
+      query += `ORDER BY ${sort_by} ${order.toUpperCase()} ;`;
 
       return db.query(query, queryValues);
     })
